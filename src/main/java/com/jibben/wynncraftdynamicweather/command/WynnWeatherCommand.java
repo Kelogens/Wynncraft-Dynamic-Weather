@@ -9,53 +9,45 @@ import net.minecraft.network.chat.Component;
 public class WynnWeatherCommand {
     public static void register() {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
-
-            dispatcher.register(ClientCommandManager.literal("wynnweather").then(ClientCommandManager.literal("clear")
+            dispatcher.register(ClientCommandManager.literal("wynnweather")
+                .then(ClientCommandManager.literal("clear")
                     .executes(context -> {
-
-                        if (!WynncraftDynamicWeather.config.enableMod) {
-                            context.getSource().sendFeedback(Component.translatable("command.wynnweather.modDisabled"));
-                        } else {
-                            WynncraftDynamicWeather.setWeatherType(WeatherType.CLEAR);
-                            context.getSource().sendFeedback(Component.translatable("command.wynnweather.clear"));
-                        }
+                        handleWeatherChange(context, WeatherType.CLEAR, "command.wynnweather.clear");
                         return 0;
                     }))
-            );
-
-            dispatcher.register(ClientCommandManager.literal("wynnweather").then(ClientCommandManager.literal("rain")
+                .then(ClientCommandManager.literal("rain")
                     .executes(context -> {
-                        if (!WynncraftDynamicWeather.config.enableMod) {
-                            context.getSource().sendFeedback(Component.translatable("command.wynnweather.modDisabled"));
-                        } else {
-                            WynncraftDynamicWeather.setWeatherType(WeatherType.RAIN);
-                            context.getSource().sendFeedback(Component.translatable("command.wynnweather.rain"));
-                        }
+                        handleWeatherChange(context, WeatherType.RAIN, "command.wynnweather.rain");
                         return 0;
                     }))
-            );
-
-            dispatcher.register(ClientCommandManager.literal("wynnweather").then(ClientCommandManager.literal("thunder")
+                .then(ClientCommandManager.literal("thunder")
                     .executes(context -> {
-                        if (!WynncraftDynamicWeather.config.enableMod) {
-                            context.getSource().sendFeedback(Component.translatable("command.wynnweather.modDisabled"));
-                        } else {
-                            WynncraftDynamicWeather.setWeatherType(WeatherType.THUNDER);
-                            context.getSource().sendFeedback(Component.translatable("command.wynnweather.thunder"));
-                        }
+                        handleWeatherChange(context, WeatherType.THUNDER, "command.wynnweather.thunder");
                         return 0;
-                    }))
-            );
+                    })));
 
             if (WynncraftDynamicWeather.config.advanced.enableDebugCommand) {
-                dispatcher.register(ClientCommandManager.literal("wynnweather").then(ClientCommandManager.literal("status")
+                dispatcher.register(ClientCommandManager.literal("wynnweather")
+                    .then(ClientCommandManager.literal("status")
                         .executes(context -> {
-                            context.getSource().sendFeedback(Component.literal("Daily Probability: " + (WynncraftDynamicWeather.getDailyProbability() * 100) + "%" + " Current Mode: " + WynncraftDynamicWeather.getWeatherType()));
+                            context.getSource().sendFeedback(Component.literal(
+                                "Daily Probability: " + (WynncraftDynamicWeather.getDailyProbability() * 100) + "%" + 
+                                " Current Mode: " + WynncraftDynamicWeather.getWeatherType()));
                             return 0;
-                        }))
-                );
+                        })));
             }
-
         });
+    }
+
+    private static void handleWeatherChange(
+        com.mojang.brigadier.context.CommandContext<net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource> context, 
+        WeatherType type, String feedbackKey) {
+            
+        if (!WynncraftDynamicWeather.config.enableMod) {
+            context.getSource().sendFeedback(Component.translatable("command.wynnweather.modDisabled"));
+        } else {
+            WynncraftDynamicWeather.setWeatherType(type);
+            context.getSource().sendFeedback(Component.translatable(feedbackKey));
+        }
     }
 }
